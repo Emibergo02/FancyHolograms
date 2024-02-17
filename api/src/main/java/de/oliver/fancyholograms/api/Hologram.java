@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -38,7 +39,6 @@ public abstract class Hologram {
      */
     @NotNull
     protected final Set<UUID> shown = new HashSet<>();
-
 
     protected Hologram(@NotNull final HologramData data) {
         this.data = data;
@@ -115,6 +115,15 @@ public abstract class Hologram {
      * @param player the player to refresh the hologram for
      */
     public final void refreshHologram(@NotNull final Player player) {
+        //get if player is looking at hologram location
+        final Vector playerToHolo = getData().getDisplayData().getLocation().clone().subtract(player.getEyeLocation()).toVector();
+        if (player.getEyeLocation().getDirection().angle(playerToHolo) < Math.PI / (playerToHolo.length() * 3)) {
+            getData().getDisplayData().setGlowing(true);
+            update();
+        } else if (getData().getDisplayData().isGlowing()) {
+            getData().getDisplayData().setGlowing(false);
+            update();
+        }
         refresh(player);
     }
 

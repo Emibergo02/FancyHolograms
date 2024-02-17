@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import de.oliver.fancyholograms.api.Hologram;
 import de.oliver.fancyholograms.api.HologramManager;
 import de.oliver.fancyholograms.api.data.HologramData;
+import de.oliver.fancyholograms.api.data.ItemHologramData;
 import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancynpcs.api.FancyNpcsPlugin;
 import org.bukkit.Bukkit;
@@ -162,24 +163,37 @@ public final class HologramManagerImpl implements HologramManager {
             final var time = System.currentTimeMillis();
 
             for (final var hologram : getHolograms()) {
-                if (!(hologram.getData().getTypeData() instanceof TextHologramData textData)) {
-                    continue;
+                if ((hologram.getData().getTypeData() instanceof ItemHologramData itemdata)) {
+                    final var interval = itemdata.getItemUpdateInterval();
+                    if (interval < 1) {
+                        continue; // doesn't update
+                    }
+
+                    final var lastUpdate = updateTimes.asMap().get(hologram.getData().getName());
+
+                    if (lastUpdate != null && time < (lastUpdate + interval)) {
+                        continue;
+                    }
+
+                    refreshHologramForPlayersInWorld(hologram);
+
+                    updateTimes.put(hologram.getData().getName(), time);
+                } else if (hologram.getData().getTypeData() instanceof TextHologramData textData) {
+                    final var interval = textData.getTextUpdateInterval();
+                    if (interval < 1) {
+                        continue; // doesn't update
+                    }
+
+                    final var lastUpdate = updateTimes.asMap().get(hologram.getData().getName());
+
+                    if (lastUpdate != null && time < (lastUpdate + interval)) {
+                        continue;
+                    }
+
+                    refreshHologramForPlayersInWorld(hologram);
+
+                    updateTimes.put(hologram.getData().getName(), time);
                 }
-
-                final var interval = textData.getTextUpdateInterval();
-                if (interval < 1) {
-                    continue; // doesn't update
-                }
-
-                final var lastUpdate = updateTimes.asMap().get(hologram.getData().getName());
-
-                if (lastUpdate != null && time < (lastUpdate + interval)) {
-                    continue;
-                }
-
-                refreshHologramForPlayersInWorld(hologram);
-
-                updateTimes.put(hologram.getData().getName(), time);
             }
         });
     }
@@ -239,7 +253,8 @@ public final class HologramManagerImpl implements HologramManager {
         final var players = ofNullable(hologram.getData().getDisplayData().getLocation())
                 .map(Location::getWorld)
                 .map(World::getPlayers)
-                .orElse(Collections.emptyList());
+                .orElse(Collections.emptyList())
+                .stream().filter(hologram::isShown).toList();
 
         hologram.refreshHologram(players);
     }

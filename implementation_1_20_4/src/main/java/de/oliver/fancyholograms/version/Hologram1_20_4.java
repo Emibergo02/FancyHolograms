@@ -152,6 +152,7 @@ public final class Hologram1_20_4 extends Hologram {
         } else if (display instanceof Display.ItemDisplay itemDisplay && data.getTypeData() instanceof ItemHologramData itemData) {
             // item
             itemDisplay.setItemStack(ItemStack.fromBukkitCopy(itemData.getItem()));
+            itemDisplay.setGlowingTag(data.getDisplayData().isGlowing());
 
         } else if (display instanceof Display.BlockDisplay blockDisplay && data.getTypeData() instanceof BlockHologramData blockData) {
             Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.of("minecraft:" + blockData.getBlock().name().toLowerCase(), ':'));

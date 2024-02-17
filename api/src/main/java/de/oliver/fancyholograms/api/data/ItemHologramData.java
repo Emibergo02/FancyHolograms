@@ -9,6 +9,7 @@ public class ItemHologramData implements Data {
     public static final ItemStack DEFAULT_ITEM = new ItemStack(Material.APPLE);
 
     private ItemStack item;
+    private int itemUpdateInterval = 150;
 
     public ItemHologramData(ItemStack item) {
         this.item = item;
@@ -38,6 +39,10 @@ public class ItemHologramData implements Data {
     public ItemHologramData setItem(ItemStack item) {
         this.item = item;
         return this;
+    }
+
+    public int getItemUpdateInterval() {
+        return itemUpdateInterval;
     }
 
     @Override

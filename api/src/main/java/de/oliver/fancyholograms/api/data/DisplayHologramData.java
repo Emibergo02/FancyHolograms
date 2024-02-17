@@ -21,6 +21,7 @@ public class DisplayHologramData implements Data {
     public static final float DEFAULT_SHADOW_STRENGTH = 1.0f;
     public static final int DEFAULT_VISIBILITY_DISTANCE = -1;
     public static final boolean DEFAULT_IS_VISIBLE = true;
+    public static final boolean DEFAULT_GLOWING = false;
 
     private Location location;
     private Display.Billboard billboard = DEFAULT_BILLBOARD;
@@ -31,6 +32,7 @@ public class DisplayHologramData implements Data {
     private float shadowStrength = DEFAULT_SHADOW_STRENGTH;
     private int visibilityDistance = DEFAULT_VISIBILITY_DISTANCE;
     private boolean visibleByDefault = DEFAULT_IS_VISIBLE;
+    private boolean glowing = DEFAULT_GLOWING;
     private String linkedNpcName;
 
     public DisplayHologramData(Location location, Display.Billboard billboard, Vector3f scale, Vector3f translation,
@@ -219,6 +221,13 @@ public class DisplayHologramData implements Data {
 
     public void setVisibleByDefault(boolean visibleByDefault) {
         this.visibleByDefault = visibleByDefault;
+    }
+
+    public boolean isGlowing() {
+        return glowing;
+    }
+    public void setGlowing(boolean glowing) {
+        this.glowing = glowing;
     }
 
     public String getLinkedNpcName() {
