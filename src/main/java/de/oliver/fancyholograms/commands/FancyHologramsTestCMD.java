@@ -64,7 +64,6 @@ public class FancyHologramsTestCMD extends Command {
                             "<gradient:red:green>Lorem ipsum dolor sit amet, consec tetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
                             "<gradient:green:yellow>Lorem ipsum dolor sit amet, consec tetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris."
                     ));
-                    textData.setTextUpdateInterval(100);
 
                     DisplayHologramData displayData = DisplayHologramData.getDefault(p.getLocation().clone().add(5 * i + 1, 0, 5 * j + 1));
                     displayData.setScale(new Vector3f(.5f, .5f, .5f));
@@ -88,7 +87,6 @@ public class FancyHologramsTestCMD extends Command {
                     "<gradient:red:green>Lorem ipsum dolor sit amet, consec tetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris.",
                     "<gradient:green:yellow>Lorem ipsum dolor sit amet, consec tetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris."
             ));
-            textData.setTextUpdateInterval(100);
             textData.setTextAlignment(TextDisplay.TextAlignment.CENTER);
             textData.setBackground(TextColor.color(78, 237, 176));
             textData.setTextShadow(true);

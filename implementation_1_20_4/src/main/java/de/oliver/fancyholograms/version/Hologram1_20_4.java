@@ -11,14 +11,17 @@ import de.oliver.fancyholograms.api.data.TextHologramData;
 import de.oliver.fancyholograms.api.events.HologramHideEvent;
 import de.oliver.fancyholograms.api.events.HologramShowEvent;
 import de.oliver.fancylib.ReflectionUtils;
+import io.papermc.paper.adventure.AdventureComponent;
 import io.papermc.paper.adventure.PaperAdventure;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.syncher.SynchedEntityData.DataItem;
 import net.minecraft.network.syncher.SynchedEntityData.DataValue;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +33,7 @@ import net.minecraft.world.entity.Display.TextDisplay;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -38,6 +42,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static de.oliver.fancylib.ReflectionUtils.getValue;
 
@@ -45,6 +51,8 @@ public final class Hologram1_20_4 extends Hologram {
 
     @Nullable
     private Display display;
+    @Nullable
+    private HoloDataContainer previousHoloDataContainer;
 
     public Hologram1_20_4(@NotNull final HologramData data) {
         super(data);
@@ -71,6 +79,8 @@ public final class Hologram1_20_4 extends Hologram {
             case ITEM -> this.display = new Display.ItemDisplay(EntityType.ITEM_DISPLAY, world);
         }
 
+        previousHoloDataContainer = null;
+
         final var DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID = ReflectionUtils.getStaticValue(Display.class, MappingKeys1_20_4.DISPLAY__DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID.getMapping());
         display.getEntityData().set((EntityDataAccessor<Integer>) DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, 1);
 
@@ -83,6 +93,7 @@ public final class Hologram1_20_4 extends Hologram {
     @Override
     public void delete() {
         this.display = null;
+        this.previousHoloDataContainer = null;
     }
 
     @Override
@@ -110,7 +121,6 @@ public final class Hologram1_20_4 extends Hologram {
             case HORIZONTAL -> Display.BillboardConstraints.HORIZONTAL;
             case CENTER -> Display.BillboardConstraints.CENTER;
         });
-
 
         if (display instanceof TextDisplay textDisplay && data.getTypeData() instanceof TextHologramData textData) {
             // line width
@@ -152,12 +162,19 @@ public final class Hologram1_20_4 extends Hologram {
         } else if (display instanceof Display.ItemDisplay itemDisplay && data.getTypeData() instanceof ItemHologramData itemData) {
             // item
             itemDisplay.setItemStack(ItemStack.fromBukkitCopy(itemData.getItem()));
-            itemDisplay.setGlowingTag(data.getDisplayData().isGlowing());
 
         } else if (display instanceof Display.BlockDisplay blockDisplay && data.getTypeData() instanceof BlockHologramData blockData) {
             Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.of("minecraft:" + blockData.getBlock().name().toLowerCase(), ':'));
             blockDisplay.setBlockState(block.defaultBlockState());
         }
+
+        //Glowing
+        if (data.getDisplayData().isGlowingWhenLooked()) {
+            display.setGlowingTag(false);
+        } else {
+            display.setGlowingTag(data.getDisplayData().isGlowing());
+        }
+        display.setGlowColorOverride(data.getDisplayData().getGlowColor());
 
         // brightness
         if (data.getDisplayData().getBrightness() != null) {
@@ -225,6 +242,8 @@ public final class Hologram1_20_4 extends Hologram {
             return false; // doesn't exist, nothing to hide
         }
 
+        this.previousHoloDataContainer = null;
+
         ((CraftPlayer) player).getHandle().connection.send(new ClientboundRemoveEntitiesPacket(display.getId()));
 
         this.shown.remove(player.getUniqueId());
@@ -234,6 +253,7 @@ public final class Hologram1_20_4 extends Hologram {
 
     @Override
     public void refresh(@NotNull final Player player) {
+        long initialTime = System.nanoTime();
         final var display = this.display;
         if (display == null) {
             return; // doesn't exist, nothing to refresh
@@ -243,20 +263,77 @@ public final class Hologram1_20_4 extends Hologram {
             return;
         }
 
-        ((CraftPlayer) player).getHandle().connection.send(new ClientboundTeleportEntityPacket(display));
-
         if (display instanceof TextDisplay textDisplay) {
             textDisplay.setText(PaperAdventure.asVanilla(getShownText(player)));
+        } else if (getData().getDisplayData().isGlowingWhenLooked()) {//Only block and item displays glow
+            display.setGlowingTag(playerIsLooking(player));
         }
 
-        final var values = new ArrayList<DataValue<?>>();
+        final List<SynchedEntityData.DataValue<?>> values = new ArrayList<>();
 
         //noinspection unchecked
         for (final var item : ((Int2ObjectMap<DataItem<?>>) getValue(display.getEntityData(), "e")).values()) {
             values.add(item.value());
         }
 
-        ((CraftPlayer) player).getHandle().connection.send(new ClientboundSetEntityDataPacket(display.getId(), values));
+        final HoloDataContainer holoDataContainer = new HoloDataContainer(
+                display.trackingPosition(),
+                display.getXRot(),
+                display.getYRot(),
+                values
+        );
+
+        if (previousHoloDataContainer == null) {
+            ((CraftPlayer) player).getHandle().connection.send(new ClientboundTeleportEntityPacket(display));
+            ((CraftPlayer) player).getHandle().connection.send(new ClientboundSetEntityDataPacket(display.getId(), values));
+            previousHoloDataContainer = holoDataContainer;
+            return;
+        }
+
+        if (holoDataContainer.hasChangedLocation(previousHoloDataContainer)) {
+            ((CraftPlayer) player).getHandle().connection.send(new ClientboundTeleportEntityPacket(display));
+        }
+
+        final List<SynchedEntityData.DataValue<?>> differentProperties = previousHoloDataContainer.differentProperties(holoDataContainer.properties());
+        if (!differentProperties.isEmpty()) {
+            ((CraftPlayer) player).getHandle().connection.send(new ClientboundSetEntityDataPacket(display.getId(), differentProperties));
+        } else {
+            System.out.println("No different properties "+(System.nanoTime()-initialTime)+"ms");
+        }
+        previousHoloDataContainer = holoDataContainer;
+    }
+
+    private record HoloDataContainer(Vec3 location, float xRot, float yRot,
+                                     List<SynchedEntityData.DataValue<?>> properties) {
+
+        public List<SynchedEntityData.DataValue<?>> differentProperties(List<DataValue<?>> newProperties) {
+            List<SynchedEntityData.DataValue<?>> differentProperties = new ArrayList<>();
+
+            for (int i = 0; i < newProperties.size(); i++) {
+                final DataValue<?> dataValue = properties.get(i);
+                final DataValue<?> newDataValue = newProperties.get(i);
+
+                if (newDataValue.value() instanceof AdventureComponent newDataValueComponent &&
+                        dataValue.value() instanceof AdventureComponent dataValueComponent) {
+                    if (GsonComponentSerializer.gson().serialize(newDataValueComponent.adventure$component())
+                            .equals(GsonComponentSerializer.gson().serialize(dataValueComponent.adventure$component()))) {
+                        continue;
+                    }
+                }
+
+                if (Objects.equals(dataValue.value(), newDataValue.value())) continue;
+
+                differentProperties.add(newDataValue);
+
+            }
+            return differentProperties;
+        }
+
+        public boolean hasChangedLocation(HoloDataContainer previousDataContainer) {
+            return this.location.equals(previousDataContainer.location) &&
+                    this.xRot == previousDataContainer.xRot &&
+                    this.yRot == previousDataContainer.yRot;
+        }
     }
 
 }

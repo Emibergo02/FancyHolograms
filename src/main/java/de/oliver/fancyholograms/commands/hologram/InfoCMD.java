@@ -51,10 +51,10 @@ public class InfoCMD implements Subcommand {
 
             MessageHelper.info(player, "Text alignment: <gray>" + textData.getTextAlignment().name());
             MessageHelper.info(player, "Text shadow: <gray>" + (textData.isTextShadow() ? "enabled" : "disabled"));
-            if (textData.getTextUpdateInterval() == -1) {
+            if (displayData.getUpdateInterval() == -1) {
                 MessageHelper.info(player, "Update text interval: <gray>not updating");
             } else {
-                MessageHelper.info(player, "Update text interval: <gray>" + textData.getTextUpdateInterval() + " ticks");
+                MessageHelper.info(player, "Update text interval: <gray>" + displayData.getUpdateInterval() + " ticks");
             }
         } else if (hologram.getData().getTypeData() instanceof BlockHologramData blockData) {
             MessageHelper.info(player, "Block: <gray>" + blockData.getBlock().name());

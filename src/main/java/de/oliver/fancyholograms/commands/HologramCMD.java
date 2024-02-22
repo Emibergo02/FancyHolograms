@@ -154,7 +154,7 @@ public final class HologramCMD extends Command {
 
             final var usingNpcs = FancyHolograms.isUsingFancyNpcs();
 
-            List<String> suggestions = new ArrayList<>(Arrays.asList("position", "moveHere", "moveTo", "rotate", "rotatepitch", "billboard", "scale", "visibilityDistance", "visibleByDefault", "shadowRadius", "shadowStrength", usingNpcs ? "linkWithNpc" : "", usingNpcs ? "unlinkWithNpc" : ""));
+            List<String> suggestions = new ArrayList<>(Arrays.asList("position", "moveHere", "moveTo", "rotate", "rotatepitch", "billboard", "scale", "visibilityDistance", "visibleByDefault", "glowing", "glowColor", "updateInterval", "glowingWhenLooked", "shadowRadius", "shadowStrength", usingNpcs ? "linkWithNpc" : "", usingNpcs ? "unlinkWithNpc" : ""));
             suggestions.addAll(type.getCommands());
 
             return suggestions.stream().filter(input -> input.toLowerCase().startsWith(args[2].toLowerCase(Locale.ROOT))).toList();
@@ -215,6 +215,10 @@ public final class HologramCMD extends Command {
                 }
                 case "block" -> Arrays.stream(Material.values()).filter(Material::isBlock).map(Enum::name);
                 case "visiblebydefault" -> Stream.of("true", "false");
+                case "glowing" -> Stream.of("true", "false");
+                case "glowcolor" -> Stream.of("-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "...");
+                case "glowingwhenlooked" -> Stream.of("true", "false");
+                case "updateinterval" -> Stream.of("-1", "100");
 
                 default -> null;
             };
@@ -306,6 +310,10 @@ public final class HologramCMD extends Command {
             case "linkwithnpc" -> new LinkWithNpcCMD().run(player, hologram, args);
             case "shadowradius" -> new ShadowRadiusCMD().run(player, hologram, args);
             case "shadowstrength" -> new ShadowStrengthCMD().run(player, hologram, args);
+            case "glowing" -> new GlowingCMD().run(player, hologram, args);
+            case "glowingwhenlooked" -> new GlowWhenLookedCMD().run(player, hologram, args);
+            case "glowcolor" -> new GlowColorCMD().run(player, hologram, args);
+            case "updateinterval" -> new UpdateIntervalCMD().run(player, hologram, args);
 
             // text data
             case "background" -> new BackgroundCMD().run(player, hologram, args);

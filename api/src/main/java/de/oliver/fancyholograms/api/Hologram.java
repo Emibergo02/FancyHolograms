@@ -115,16 +115,14 @@ public abstract class Hologram {
      * @param player the player to refresh the hologram for
      */
     public final void refreshHologram(@NotNull final Player player) {
-        //get if player is looking at hologram location
-        final Vector playerToHolo = getData().getDisplayData().getLocation().clone().subtract(player.getEyeLocation()).toVector();
-        if (player.getEyeLocation().getDirection().angle(playerToHolo) < Math.PI / (playerToHolo.length() * 3)) {
-            getData().getDisplayData().setGlowing(true);
-            update();
-        } else if (getData().getDisplayData().isGlowing()) {
-            getData().getDisplayData().setGlowing(false);
-            update();
-        }
         refresh(player);
+    }
+
+    public final boolean playerIsLooking(@NotNull final Player player) {
+        final Vector playerToHolo = getData().getDisplayData().getLocation().clone()
+                .subtract(player.getEyeLocation())
+                .toVector();
+        return player.getEyeLocation().getDirection().angle(playerToHolo) < Math.PI / (playerToHolo.length() * 3);
     }
 
     public final void refreshHologram(@NotNull final Collection<? extends Player> players) {

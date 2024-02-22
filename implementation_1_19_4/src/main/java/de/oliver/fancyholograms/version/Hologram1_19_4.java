@@ -158,6 +158,14 @@ public final class Hologram1_19_4 extends Hologram {
             blockDisplay.setBlockState(block.defaultBlockState());
         }
 
+        //Glowing
+        if (data.getDisplayData().isGlowingWhenLooked()) {
+            display.setGlowingTag(false);
+        }else{
+            display.setGlowingTag(data.getDisplayData().isGlowing());
+        }
+        display.setGlowColorOverride(data.getDisplayData().getGlowColor());
+
         // brightness
         if (data.getDisplayData().getBrightness() != null) {
             display.setBrightnessOverride(new Brightness(data.getDisplayData().getBrightness().getBlockLight(),
@@ -246,6 +254,8 @@ public final class Hologram1_19_4 extends Hologram {
 
         if (display instanceof TextDisplay textDisplay) {
             textDisplay.setText(PaperAdventure.asVanilla(getShownText(player)));
+        } else if (getData().getDisplayData().isGlowingWhenLooked()) {
+            display.setGlowingTag(playerIsLooking(player));
         }
 
         final var values = new ArrayList<DataValue<?>>();

@@ -14,20 +14,17 @@ public class TextHologramData implements Data {
 
     public static final TextDisplay.TextAlignment DEFAULT_TEXT_ALIGNMENT = TextDisplay.TextAlignment.CENTER;
     public static final boolean DEFAULT_TEXT_SHADOW_STATE = false;
-    public static final int DEFAULT_TEXT_UPDATE_INTERVAL = -1;
 
     private List<String> text;
     private TextColor background;
     private TextDisplay.TextAlignment textAlignment;
     private boolean textShadow;
-    private int textUpdateInterval;
 
-    public TextHologramData(List<String> text, TextColor background, TextDisplay.TextAlignment textAlignment, boolean textShadow, int textUpdateInterval) {
+    public TextHologramData(List<String> text, TextColor background, TextDisplay.TextAlignment textAlignment, boolean textShadow) {
         this.text = text;
         this.background = background;
         this.textAlignment = textAlignment;
         this.textShadow = textShadow;
-        this.textUpdateInterval = textUpdateInterval;
     }
 
     public TextHologramData() {
@@ -41,8 +38,7 @@ public class TextHologramData implements Data {
                 text,
                 null,
                 DEFAULT_TEXT_ALIGNMENT,
-                DEFAULT_TEXT_SHADOW_STATE,
-                DEFAULT_TEXT_UPDATE_INTERVAL
+                DEFAULT_TEXT_SHADOW_STATE
         );
     }
 
@@ -54,7 +50,6 @@ public class TextHologramData implements Data {
         }
 
         textShadow = section.getBoolean("text_shadow", false);
-        textUpdateInterval = section.getInt("update_text_interval", DEFAULT_TEXT_UPDATE_INTERVAL);
 
         String textAlignmentStr = section.getString("text_alignment", DEFAULT_TEXT_ALIGNMENT.name().toLowerCase());
         textAlignment = switch (textAlignmentStr.toLowerCase(Locale.ROOT)) {
@@ -81,7 +76,6 @@ public class TextHologramData implements Data {
         section.set("text", text);
         section.set("text_shadow", textShadow);
         section.set("text_alignment", textAlignment.name().toLowerCase(Locale.ROOT));
-        section.set("update_text_interval", textUpdateInterval);
 
         final String color;
         if (background == null) {
@@ -141,23 +135,13 @@ public class TextHologramData implements Data {
         return this;
     }
 
-    public int getTextUpdateInterval() {
-        return textUpdateInterval;
-    }
-
-    public TextHologramData setTextUpdateInterval(int textUpdateInterval) {
-        this.textUpdateInterval = textUpdateInterval;
-        return this;
-    }
-
     @Override
     public Data copy() {
         return new TextHologramData(
                 new ArrayList<>(text),
                 background,
                 textAlignment,
-                textShadow,
-                textUpdateInterval
+                textShadow
         );
     }
 }

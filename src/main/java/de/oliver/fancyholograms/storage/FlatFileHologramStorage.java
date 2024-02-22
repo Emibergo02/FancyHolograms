@@ -183,7 +183,7 @@ public class FlatFileHologramStorage implements HologramStorage {
 
             final var text = config.getStringList("text");
             final var textHasShadow = config.getBoolean("text_shadow", TextHologramData.DEFAULT_TEXT_SHADOW_STATE);
-            final var textUpdateInterval = config.getInt("update_text_interval", TextHologramData.DEFAULT_TEXT_UPDATE_INTERVAL);
+            final var textUpdateInterval = config.getInt("update_text_interval", DisplayHologramData.DEFAULT_UPDATE_INTERVAL);
             final var visibilityDistance = config.getInt("visibility_distance", DisplayHologramData.DEFAULT_VISIBILITY_DISTANCE);
             final var scaleX = config.getDouble("scale_x", 1);
             final var scaleY = config.getDouble("scale_y", 1);
@@ -221,9 +221,9 @@ public class FlatFileHologramStorage implements HologramStorage {
             }
 
 
-            DisplayHologramData displayData = new DisplayHologramData(location, billboard, new Vector3f((float) scaleX, (float) scaleY, (float) scaleZ), DisplayHologramData.DEFAULT_TRANSLATION, null, (float) shadowRadius, (float) shadowStrength, visibilityDistance, linkedNpc, visibleByDefault);
+            DisplayHologramData displayData = new DisplayHologramData(location, billboard, new Vector3f((float) scaleX, (float) scaleY, (float) scaleZ), DisplayHologramData.DEFAULT_TRANSLATION, null, (float) shadowRadius, (float) shadowStrength, visibilityDistance, linkedNpc, visibleByDefault,false,false,-1,-1);
 
-            TextHologramData textData = new TextHologramData(text, background, textAlignment, textHasShadow, textUpdateInterval);
+            TextHologramData textData = new TextHologramData(text, background, textAlignment, textHasShadow);
 
             return new HologramData(name, displayData, HologramType.TEXT, textData);
         }

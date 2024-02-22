@@ -22,6 +22,8 @@ public class DisplayHologramData implements Data {
     public static final int DEFAULT_VISIBILITY_DISTANCE = -1;
     public static final boolean DEFAULT_IS_VISIBLE = true;
     public static final boolean DEFAULT_GLOWING = false;
+    public static final int DEFAULT_GLOWING_COLOR = -1;
+    public static final int DEFAULT_UPDATE_INTERVAL = -1;
 
     private Location location;
     private Display.Billboard billboard = DEFAULT_BILLBOARD;
@@ -33,11 +35,15 @@ public class DisplayHologramData implements Data {
     private int visibilityDistance = DEFAULT_VISIBILITY_DISTANCE;
     private boolean visibleByDefault = DEFAULT_IS_VISIBLE;
     private boolean glowing = DEFAULT_GLOWING;
+    private boolean glowingWhenLooked = DEFAULT_GLOWING;
+    private int glowColor = DEFAULT_GLOWING_COLOR;
+    private int updateInterval = DEFAULT_UPDATE_INTERVAL;
     private String linkedNpcName;
 
     public DisplayHologramData(Location location, Display.Billboard billboard, Vector3f scale, Vector3f translation,
                                Display.Brightness brightness, float shadowRadius, float shadowStrength,
-                               int visibilityDistance, String linkedNpcName, boolean visibleByDefault) {
+                               int visibilityDistance, String linkedNpcName, boolean visibleByDefault,boolean glowing,
+                               boolean glowingWhenLooked,int glowColor,int updateInterval) {
         this.location = location;
         this.billboard = billboard;
         this.scale = scale;
@@ -48,6 +54,10 @@ public class DisplayHologramData implements Data {
         this.visibilityDistance = visibilityDistance;
         this.linkedNpcName = linkedNpcName;
         this.visibleByDefault = visibleByDefault;
+        this.glowing = glowing;
+        this.glowingWhenLooked = glowingWhenLooked;
+        this.glowColor = glowColor;
+        this.updateInterval = updateInterval;
     }
 
     public DisplayHologramData() {
@@ -64,7 +74,11 @@ public class DisplayHologramData implements Data {
                 DEFAULT_SHADOW_STRENGTH,
                 DEFAULT_VISIBILITY_DISTANCE,
                 null,
-                DEFAULT_IS_VISIBLE
+                DEFAULT_IS_VISIBLE,
+                DEFAULT_GLOWING,
+                DEFAULT_GLOWING,
+                DEFAULT_GLOWING_COLOR,
+                DEFAULT_UPDATE_INTERVAL
         );
     }
 
@@ -84,6 +98,10 @@ public class DisplayHologramData implements Data {
         section.set("shadow_strength", shadowStrength);
         section.set("visibility_distance", visibilityDistance);
         section.set("visible_by_default", visibleByDefault);
+        section.set("glowing", glowing);
+        section.set("glowing_when_looked", glowingWhenLooked);
+        section.set("glow_color", glowColor);
+        section.set("update_interval", updateInterval);
 
 
         if (billboard == Display.Billboard.CENTER) {
@@ -129,6 +147,10 @@ public class DisplayHologramData implements Data {
         visibilityDistance = section.getInt("visibility_distance", DEFAULT_VISIBILITY_DISTANCE);
         linkedNpcName = section.getString("linkedNpc");
         visibleByDefault = section.getBoolean("visible_by_default", DEFAULT_IS_VISIBLE);
+        glowing = section.getBoolean("glowing", DEFAULT_GLOWING);
+        glowingWhenLooked = section.getBoolean("glowing_when_looked", DEFAULT_GLOWING);
+        glowColor = section.getInt("glow_color", DEFAULT_GLOWING_COLOR);
+        updateInterval = section.getInt("update_interval", DEFAULT_UPDATE_INTERVAL);
 
         String billboardStr = section.getString("billboard", DisplayHologramData.DEFAULT_BILLBOARD.name());
         billboard = switch (billboardStr.toLowerCase()) {
@@ -226,8 +248,33 @@ public class DisplayHologramData implements Data {
     public boolean isGlowing() {
         return glowing;
     }
+
     public void setGlowing(boolean glowing) {
         this.glowing = glowing;
+    }
+
+    public void setGlowingWhenLooked(boolean glowingWhenLooked) {
+        this.glowingWhenLooked = glowingWhenLooked;
+    }
+
+    public boolean isGlowingWhenLooked() {
+        return glowingWhenLooked;
+    }
+
+    public int getGlowColor() {
+        return glowColor;
+    }
+
+    public void setGlowColor(int glowColor) {
+        this.glowColor = glowColor;
+    }
+
+    public int getUpdateInterval() {
+        return updateInterval;
+    }
+
+    public void setUpdateInterval(int updateInterval) {
+        this.updateInterval = updateInterval;
     }
 
     public String getLinkedNpcName() {
@@ -251,7 +298,11 @@ public class DisplayHologramData implements Data {
                 shadowStrength,
                 visibilityDistance,
                 linkedNpcName,
-                visibleByDefault
+                visibleByDefault,
+                glowing,
+                glowingWhenLooked,
+                glowColor,
+                updateInterval
         );
     }
 }

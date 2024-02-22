@@ -60,26 +60,23 @@ public class UpdateTextIntervalCMD implements Subcommand {
             return false;
         }
 
-        if (interval == textData.getTextUpdateInterval()) {
-            MessageHelper.warning(player, "This hologram already has this text update interval");
-            return false;
-        }
+        //if (interval == textData.getTextUpdateInterval()) {
+        //    MessageHelper.warning(player, "This hologram already has this text update interval");
+        //    return false;
+        //}
 
         interval = Math.max(-1, interval);
 
         final var copied = hologram.getData().copy();
-        ((TextHologramData) copied.getTypeData()).setTextUpdateInterval(interval);
+        //((TextHologramData) copied.getTypeData()).setTextUpdateInterval(interval);
 
         if (!HologramCMD.callModificationEvent(hologram, player, copied, HologramUpdateEvent.HologramModification.UPDATE_TEXT_INTERVAL)) {
             return false;
         }
 
-        if (((TextHologramData) copied.getTypeData()).getTextUpdateInterval() == textData.getTextUpdateInterval()) {
-            MessageHelper.warning(player, "This hologram already has this text update interval");
-            return false;
-        }
+        ///}
 
-        textData.setTextUpdateInterval(((TextHologramData) copied.getTypeData()).getTextUpdateInterval());
+        //textData.setTextUpdateInterval(((TextHologramData) copied.getTypeData()).getTextUpdateInterval());
 
         if (FancyHolograms.get().getHologramConfiguration().isSaveOnChangedEnabled()) {
             FancyHolograms.get().getHologramStorage().save(hologram);
