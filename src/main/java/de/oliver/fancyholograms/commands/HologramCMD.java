@@ -216,7 +216,8 @@ public final class HologramCMD extends Command {
                 case "block" -> Arrays.stream(Material.values()).filter(Material::isBlock).map(Enum::name);
                 case "visiblebydefault" -> Stream.of("true", "false");
                 case "glowing" -> Stream.of("true", "false");
-                case "glowcolor" -> Stream.of("-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "...");
+                case "glowcolor" ->
+                        Stream.of("255,255,255", "255,0,0", "0,255,0", "0,0,255", "255,255,0", "0,255,255", "255,0,255", "0,0,0");
                 case "glowingwhenlooked" -> Stream.of("true", "false");
                 case "updateinterval" -> Stream.of("-1", "100");
 

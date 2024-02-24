@@ -255,7 +255,7 @@ public final class Hologram1_19_4 extends Hologram {
         if (display instanceof TextDisplay textDisplay) {
             textDisplay.setText(PaperAdventure.asVanilla(getShownText(player)));
         } else if (getData().getDisplayData().isGlowingWhenLooked()) {
-            display.setGlowingTag(playerIsLooking(player));
+            display.setGlowingTag(isPlayerLooking(player));
         }
 
         final var values = new ArrayList<DataValue<?>>();

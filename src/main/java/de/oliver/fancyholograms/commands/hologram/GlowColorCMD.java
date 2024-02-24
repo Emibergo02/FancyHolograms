@@ -4,6 +4,7 @@ import de.oliver.fancyholograms.FancyHolograms;
 import de.oliver.fancyholograms.api.Hologram;
 import de.oliver.fancyholograms.commands.Subcommand;
 import de.oliver.fancylib.MessageHelper;
+import org.bukkit.Color;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +20,19 @@ public class GlowColorCMD implements Subcommand {
 
     @Override
     public boolean run(@NotNull Player player, @Nullable Hologram hologram, @NotNull String[] args) {
-        int glowColor = Integer.parseInt(args[3]);
+        final String[] colorComponents = args[3].split(",");
         if (hologram == null) {
             return false;
         }
+
+        if (colorComponents.length != 3) {
+            MessageHelper.error(player, "Invalid color format. Use R,G,B");
+            return false;
+        }
+        int glowColor = Color.fromRGB(Integer.parseInt(colorComponents[0]),
+                Integer.parseInt(colorComponents[1]),
+                Integer.parseInt(colorComponents[2]))
+                .asRGB();
 
         final var copied = hologram.getData().copy();
         copied.getDisplayData().setGlowColor(glowColor);

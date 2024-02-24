@@ -6,6 +6,7 @@ public enum MappingKeys1_20_4 {
     DISPLAY__DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID("q"),
     TEXT_DISPLAY__DATA_LINE_WIDTH_ID("aN"),
     TEXT_DISPLAY__DATA_BACKGROUND_COLOR_ID("aO"),
+    DATA_VALUE_FIELD("e"),
     ;
 
     private final String mapping;

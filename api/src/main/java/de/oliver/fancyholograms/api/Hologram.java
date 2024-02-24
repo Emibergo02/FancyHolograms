@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract base class for creating, updating, and managing holograms.
@@ -31,6 +33,7 @@ public abstract class Hologram {
     public static final int LINE_WIDTH = 1000;
     public static final TextColor TRANSPARENT = () -> 0;
     protected static final int MINIMUM_PROTOCOL_VERSION = 762;
+    protected static final ExecutorService updateThread = Executors.newFixedThreadPool(2);
 
     @NotNull
     protected final HologramData data;
@@ -118,7 +121,7 @@ public abstract class Hologram {
         refresh(player);
     }
 
-    public final boolean playerIsLooking(@NotNull final Player player) {
+    public final boolean isPlayerLooking(@NotNull final Player player) {
         final Vector playerToHolo = getData().getDisplayData().getLocation().clone()
                 .subtract(player.getEyeLocation())
                 .toVector();
@@ -170,7 +173,7 @@ public abstract class Hologram {
      * @param player the player to check and update the shown state for
      */
     public void checkAndUpdateShownStateForPlayer(Player player) {
-        FancyHologramsPlugin.get().getScheduler().runTaskAsynchronously(() -> {
+        updateThread.submit(() -> {
             boolean isShown = isShown(player);
             boolean shouldHologramBeShown = shouldHologramBeShown(player);
 
